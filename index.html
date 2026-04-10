@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MBTI 幸福匹配手冊</title>
+    <style>
+        :root {
+            --ideal: #3498db; --great: #27ae60; --caution: #e74c3c;
+            --bg: #f5f7fa; --card: #ffffff;
+        }
+        body { font-family: "Microsoft JhengHei", sans-serif; background-color: var(--bg); display: flex; justify-content: center; padding: 20px; }
+        .container { background: var(--card); padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 500px; text-align: center; }
+        h1 { color: #2c3e50; margin-bottom: 10px; }
+        p.subtitle { color: #7f8c8d; font-size: 0.9em; margin-bottom: 25px; }
+        select { width: 100%; padding: 12px; border-radius: 10px; border: 2px solid #ddd; font-size: 16px; margin-bottom: 20px; outline: none; }
+        button { width: 100%; padding: 15px; background: #2c3e50; color: white; border: none; border-radius: 10px; font-size: 18px; cursor: pointer; transition: 0.3s; }
+        button:hover { background: #34495e; }
+        .result-section { margin-top: 30px; text-align: left; display: none; }
+        .match-group { margin-bottom: 20px; padding: 15px; border-radius: 12px; }
+        .ideal { border-left: 5px solid var(--ideal); background: #ebf5fb; }
+        .great { border-left: 5px solid var(--great); background: #e9f7ef; }
+        .caution { border-left: 5px solid var(--caution); background: #fdedec; }
+        .group-title { font-weight: bold; margin-bottom: 8px; display: block; }
+        .type-tag { display: inline-block; background: white; padding: 5px 12px; margin: 4px; border-radius: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); font-size: 14px; }
+        .wisdom { font-style: italic; color: #7f8c8d; margin-top: 20px; font-size: 0.9em; border-top: 1px solid #eee; padding-top: 15px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>MBTI 匹配手冊</h1>
+    <p class="subtitle">探索關係中的幸福密碼</p>
+    
+    <select id="userType">
+        <option value="" disabled selected>選擇你的 MBTI 類型</option>
+        <option value="ENFP">ENFP (競選者)</option>
+        <option value="INTJ">INTJ (建築師)</option>
+        <option value="INFP">INFP (調解者)</option>
+        <option value="INFJ">INFJ (提倡者)</option>
+        <option value="ENTP">ENTP (辯論家)</option>
+        <option value="ENTJ">ENTJ (指揮官)</option>
+        <option value="INTP">INTP (邏輯學家)</option>
+        <option value="ENFJ">ENFJ (主人公)</option>
+        <option value="ISTJ">ISTJ (物流師)</option>
+        <option value="ISFJ">ISFJ (守衛者)</option>
+        <option value="ESTJ">ESTJ (總經理)</option>
+        <option value="ESFJ">ESFJ (執政官)</option>
+        <option value="ISTP">ISTP (鑑賞家)</option>
+        <option value="ISFP">ISFP (藝術家)</option>
+        <option value="ESTP">ESTP (企業家)</option>
+        <option value="ESFP">ESFP (表演者)</option>
+    </select>
+
+    <button onclick="findMatch()">查看匹配結果</button>
+
+    <div id="results" class="result-section">
+        <div class="match-group ideal">
+            <span class="group-title" style="color: var(--ideal);">💎 天生一對 (Ideal)</span>
+            <div id="idealList"></div>
+        </div>
+        <div class="match-group great">
+            <span class="group-title" style="color: var(--great);">🌿 很有機會 (Good Chance)</span>
+            <div id="greatList"></div>
+        </div>
+        <div class="match-group caution">
+            <span class="group-title" style="color: var(--caution);">⚠️ 磨合挑戰 (Need Work)</span>
+            <div id="cautionList"></div>
+        </div>
+        <div class="wisdom">
+            「幸福不是找到一個完美的人，而是學會用完美的眼光，欣賞一個不完美的人。」
+        </div>
+    </div>
+</div>
+
+<script>
+    // 根據矩陣圖完整補齊 16 型邏輯
+    const matchData = {
+        "INFP": {
+            ideal: ["ENFJ", "ENTJ"],
+            great: ["INFP", "ENFP", "INFJ", "INTJ", "INTP", "ENTP"],
+            caution: ["ISFP", "ESFP", "ISTP", "ESTP", "ISFJ", "ESFJ", "ISTJ", "ESTJ"]
+        },
+        "ENFP": {
+            ideal: ["INFJ", "INTJ"],
+            great: ["INFP", "ENFP", "ENFJ", "ENTJ", "INTP", "ENTP"],
+            caution: ["ISFP", "ESFP", "ISTP", "ESTP", "ISFJ", "ESFJ", "ISTJ", "ESTJ"]
+        },
+        "INFJ": {
+            ideal: ["ENFP", "ENTP"],
+            great: ["INFP", "INFJ", "ENFJ", "INTJ", "ENTJ", "INTP"],
+            caution: ["ISFP", "ESFP", "ISTP", "ESTP", "ISFJ", "ESFJ", "ISTJ", "ESTJ"]
+        },
+        "ENFJ": {
+            ideal: ["INFP", "ISFP"],
+            great: ["ENFP", "INFJ", "ENFJ", "INTJ", "ENTJ", "INTP", "ENTP"],
+            caution: ["ESFP", "ISTP", "ESTP", "ISFJ", "ESFJ", "ISTJ", "ESTJ"]
+        },
+        "INTJ": {
+            ideal: ["ENFP", "ENTP"],
+            great: ["INFP", "INFJ", "ENFJ", "INTJ", "ENTJ", "INTP"],
+            caution: ["ISFJ", "ESFJ", "ISTJ", "ESTJ"]
+        },
+        "ENTJ": {
+            ideal: ["INFP", "INTP"],
+            great: ["ENFP", "INFJ", "ENFJ", "INTJ", "ENTJ", "ENTP"],
+            caution: [] // ENTJ 在圖中相對沒有全紅區，多為黃色/綠色
+        },
+        "INTP": {
+            ideal: ["ENTJ", "ESTJ"],
+            great: ["INFP", "ENFP", "INFJ", "ENFJ", "INTJ", "INTP", "ENTP"],
+            caution: []
+        },
+        "ENTP": {
+            ideal: ["INFJ", "INTJ"],
+            great: ["INFP", "ENFP", "ENFJ", "ENTJ", "INTP", "ENTP"],
+            caution: []
+        },
+        "ISFP": {
+            ideal: ["ENFJ", "ESFJ", "ESTJ"],
+            great: ["ISFP", "ESFP", "ISTP", "ESTP", "ISFJ", "ISTJ"],
+            caution: ["INFP", "ENFP", "INFJ"]
+        },
+        "ESFP": {
+            ideal: ["ISFJ", "ISTJ"],
+            great: ["ISFP", "ESFP", "ISTP", "ESTP", "ESFJ", "ESTJ"],
+            caution: ["INFP", "ENFP", "INFJ", "ENFJ"]
+        },
+        "ISTP": {
+            ideal: ["ESFJ", "ESTJ"],
+            great: ["ISFP", "ESFP", "ISTP", "ESTP", "ISFJ", "ISTJ"],
+            caution: ["INFP", "ENFP", "INFJ", "ENFJ"]
+        },
+        "ESTP": {
+            ideal: ["ISFJ", "ISTJ"],
+            great: ["ISFP", "ESFP", "ISTP", "ESTP", "ESFJ", "ESTJ"],
+            caution: ["INFP", "ENFP", "INFJ", "ENFJ"]
+        },
+        "ISFJ": {
+            ideal: ["ESFP", "ESTP"],
+            great: ["ISFJ", "ESFJ", "ISTJ", "ESTJ", "ISFP", "ISTP"],
+            caution: ["INFP", "ENFP", "INFJ", "ENFJ", "INTJ"]
+        },
+        "ESFJ": {
+            ideal: ["ISFP", "ISTP"],
+            great: ["ISFJ", "ESFJ", "ISTJ", "ESTJ", "ESFP", "ESTP"],
+            caution: ["INFP", "ENFP", "INFJ", "ENFJ", "INTJ"]
+        },
+        "ISTJ": {
+            ideal: ["ESFP", "ESTP"],
+            great: ["ISFJ", "ESFJ", "ISTJ", "ESTJ", "ISFP", "ISTP"],
+            caution: ["INFP", "ENFP", "INFJ", "ENFJ", "INTJ"]
+        },
+        "ESTJ": {
+            ideal: ["INTP", "ISFP", "ISTP"],
+            great: ["ISFJ", "ESFJ", "ISTJ", "ESTJ", "ESFP", "ESTP"],
+            caution: ["INFP", "ENFP", "INFJ", "ENFJ", "INTJ"]
+        }
+    };
+
+    function findMatch() {
+        const type = document.getElementById('userType').value;
+        if(!type) return alert('請先選擇類型');
+
+        const data = matchData[type];
+        
+        // 渲染列表
+        renderList('idealList', data.ideal);
+        renderList('greatList', data.great);
+        renderList('cautionList', data.caution);
+
+        // 顯示結果區域
+        document.getElementById('results').style.display = 'block';
+        
+        // 滾動到結果位置
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    }
+
+    function renderList(elementId, list) {
+        const container = document.getElementById(elementId);
+        if (list.length === 0) {
+            container.parentElement.style.display = 'none'; // 如果沒資料就隱藏該區塊
+        } else {
+            container.parentElement.style.display = 'block';
+            container.innerHTML = list.map(item => `<span class="type-tag">${item}</span>`).join('');
+        }
+    }
+</script>
+
+</body>
+</html>
